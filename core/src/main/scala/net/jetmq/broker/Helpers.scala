@@ -9,6 +9,17 @@ import scodec.bits.{BitVector, ByteVector}
 
 object Helpers {
 
+  class ConnectionException(msg: String) extends Throwable(msg) {
+    override def equals(that: Any): Boolean =
+      that match {
+        case that: ConnectionException => that.getMessage.canEqual(this.getMessage)
+        case _ => false
+      }
+  }
+
+  object ConnectionException {
+    def apply(msg: String) = new ConnectionException(msg)
+  }
 
   implicit class ByteStringHelper(val s: ByteString) extends AnyVal {
 

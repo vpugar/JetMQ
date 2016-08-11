@@ -6,6 +6,7 @@ import akka.stream.actor.ActorPublisherMessage.{Cancel, Request}
 import akka.stream.actor.ActorSubscriberMessage.{OnComplete, OnError, OnNext}
 import akka.stream.actor.{ActorSubscriber, OneByOneRequestStrategy, RequestStrategy}
 import akka.util.Timeout
+import net.jetmq.broker.Helpers.ConnectionException
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -21,7 +22,7 @@ class MqttConnectionActor(sessions: ActorRef) extends ActorSubscriber with Actor
 
     case OnNext(c: Connect) if (session != ActorRef.noSender) => {
 
-      onErrorThenStop(new Throwable("Actor already connected"))
+      onErrorThenStop(ConnectionException("Actor already connected"))
     }
 
     case OnNext(c: Connect) => {
@@ -36,7 +37,7 @@ class MqttConnectionActor(sessions: ActorRef) extends ActorSubscriber with Actor
       log.info("Got " + c)
     }
 
-    case OnNext(p: Packet) if (session == ActorRef.noSender) => onErrorThenStop(new Throwable("Actor not connected yet"))
+    case OnNext(p: Packet) if (session == ActorRef.noSender) => onErrorThenStop(new ConnectionException("Actor not connected yet"))
 
     case OnNext(d: Disconnect) => {
       session ! Disconnect(Header(dup = false, qos = 0, retain = false))
@@ -70,13 +71,13 @@ class MqttConnectionActor(sessions: ActorRef) extends ActorSubscriber with Actor
     case WrongState => {
       log.info("Session was in a wrong state")
 
-      onErrorThenStop(new Throwable("Session was in a wrong state"))
+      onErrorThenStop(new ConnectionException("Session was in a wrong state"))
     }
 
     case KeepAliveTimeout => {
       log.info("Keep alive timed out. Closing connection")
 
-      onErrorThenStop(new Throwable("Keep alive timed out. Closing connection"))
+      onErrorThenStop(new ConnectionException("Keep alive timed out. Closing connection"))
     }
 
     case OnComplete => onCompleteThenStop()

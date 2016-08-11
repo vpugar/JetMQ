@@ -21,7 +21,7 @@ class WillSpec extends TestKit(ActorSystem("WillSpec")) with ImplicitSender with
   "Requests handler actor" should {
 
     val bus = system.actorOf(Props[EventBusActor], "bus")
-    val devices = system.actorOf(Props(new SessionsManagerActor(bus)), "devices")
+    val devices = system.actorOf(Props(new SessionsManagerActor(bus, bus)), "devices")
 
     implicit val materializer = ActorMaterializer()(system)
 
@@ -88,9 +88,13 @@ class WillSpec extends TestKit(ActorSystem("WillSpec")) with ImplicitSender with
       expectMsg("9003000202".toByteString) //Suback(Header(false,0,false),2,Vector(2))
 
       h3 ! Tcp.PeerClosed
-      expectMsgType[Failure]
 
-      expectMsg("34220007546f7069632f430001636c69656e74206e6f7420646973636f6e6e6563746564".toByteString) //Publish(Header(false,2,false),Topic/C,1,ByteVector(23 bytes, 0x636c69656e74206e6f7420646973636f6e6e6563746564))
+      // TODO VP check if this is valid
+      expectMsgAllOf(
+        Failure(ConnectionException("Keep alive timed out. Closing connection")),
+        "34220007546f7069632f430001636c69656e74206e6f7420646973636f6e6e6563746564".toByteString //Publish(Header(false,2,false),Topic/C,1,ByteVector(23 bytes, 0x636c69656e74206e6f7420646973636f6e6e6563746564))
+      )
+//      expectMsgType[Failure]
 
       h4 ! "50020001".toByteString //Pubrec(Header(false,0,false),1)
       expectMsg("62020001".toByteString) //Pubrel(Header(false,1,false),1)

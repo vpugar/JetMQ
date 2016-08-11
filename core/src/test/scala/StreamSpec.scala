@@ -20,7 +20,7 @@ class StreamSpec extends TestKit(ActorSystem("BasicSpec")) with ImplicitSender w
   "Requests handler actor" should {
 
     val bus = system.actorOf(Props[EventBusActor], "bus")
-    val devices = system.actorOf(Props(new SessionsManagerActor(bus)), "devices")
+    val devices = system.actorOf(Props(new SessionsManagerActor(bus, bus)), "devices")
     implicit val materializer = ActorMaterializer()(system)
 
     def create_actor(name: String): ActorRef = {

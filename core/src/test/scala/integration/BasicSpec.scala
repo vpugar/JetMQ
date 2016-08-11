@@ -21,7 +21,7 @@ class BasicSpec extends TestKit(ActorSystem("BasicSpec")) with ImplicitSender wi
   "Requests handler actor" should {
 
     val bus = system.actorOf(Props[EventBusActor], "bus")
-    val devices = system.actorOf(Props(new SessionsManagerActor(bus)), "devices")
+    val devices = system.actorOf(Props(new SessionsManagerActor(bus, bus)), "devices")
     implicit val materializer = ActorMaterializer()(system)
 
     def create_actor(name: String): ActorRef = {
@@ -94,10 +94,13 @@ class BasicSpec extends TestKit(ActorSystem("BasicSpec")) with ImplicitSender wi
       expectMsg("9003000202".toByteString) //Suback(Header(false,0,false),2,Vector(2))
 
       h ! "300d0006546f70696341716f732030320f0006546f706963410003716f732031340f0006546f706963410004716f732032".toByteString //Publish(Header(false,0,false),TopicA,0,ByteVector(5 bytes, 0x716f732030))
-      expectMsg("40020003".toByteString) //Puback(Header(false,0,false),3)
-      expectMsg("50020004".toByteString) //Pubrec
-      expectMsg("300d0006546f70696341716f732030".toByteString) //Publish(Header(false,0,false),TopicA,0,ByteVector(5 bytes, 0x716f732030))
-      expectMsg("320f0006546f706963410001716f732031".toByteString) //Publish(Header(false,1,false),TopicA,1,ByteVector(5 bytes, 0x716f732031))
+      // TODO VP check if this is valid
+      expectMsgAllOf(
+        "40020003".toByteString, //Puback(Header(false,0,false),3)
+        "50020004".toByteString, //Pubrec
+        "300d0006546f70696341716f732030".toByteString, //Publish(Header(false,0,false),TopicA,0,ByteVector(5 bytes, 0x716f732030))
+        "320f0006546f706963410001716f732031".toByteString //Publish(Header(false,1,false),TopicA,1,ByteVector(5 bytes, 0x716f732031))
+      )
 
       h ! "40020001".toByteString //Puback(Header(false,0,false),1)
 

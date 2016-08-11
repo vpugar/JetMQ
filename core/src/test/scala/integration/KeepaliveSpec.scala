@@ -20,7 +20,7 @@ class KeepaliveSpec extends TestKit(ActorSystem("KeepaliveSpec")) with ImplicitS
   "Requests handler actor" should {
 
     val bus = system.actorOf(Props[EventBusActor], "bus")
-    val devices = system.actorOf(Props(new SessionsManagerActor(bus)), "devices")
+    val devices = system.actorOf(Props(new SessionsManagerActor(bus, bus)), "devices")
     implicit val materializer = ActorMaterializer()(system)
 
     def create_actor(name: String): ActorRef = {
@@ -31,7 +31,6 @@ class KeepaliveSpec extends TestKit(ActorSystem("KeepaliveSpec")) with ImplicitS
 
       return h
     }
-
 
     "Scenario 59073" in {
       val h = create_actor("59073")
@@ -89,8 +88,13 @@ class KeepaliveSpec extends TestKit(ActorSystem("KeepaliveSpec")) with ImplicitS
 
       Thread.sleep(100)
 
-      expectMsgType[Failure](Bag.ten_sec)
-      expectMsg(Bag.ten_sec, "341b00072f546f7069634100016b656570616c69766520657870697279".toByteString) //Publish(Header(false,2,false),/TopicA,1,ByteVector(16 bytes, 0x6b656570616c69766520657870697279))
+      // TODO VP check if this is valid
+      expectMsgAllOf(Bag.ten_sec,
+        Failure(new ConnectionException("Keep alive timed out. Closing connection")),
+        "341b00072f546f7069634100016b656570616c69766520657870697279".toByteString //Publish(Header(false,2,false),/TopicA,1,ByteVector(16 bytes, 0x6b656570616c69766520657870697279))
+      )
+//      expectMsgType[Failure](Bag.ten_sec)
+//      expectMsg(Bag.ten_sec, "341b00072f546f7069634100016b656570616c69766520657870697279".toByteString) //Publish(Header(false,2,false),/TopicA,1,ByteVector(16 bytes, 0x6b656570616c69766520657870697279))
 
       h2 ! "50020001".toByteString //Pubrec(Header(false,0,false),1)
       expectMsg("62020001".toByteString) //Pubrel(Header(false,1,false),1)

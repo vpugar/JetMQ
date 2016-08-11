@@ -20,7 +20,7 @@ class RetainedSpec extends TestKit(ActorSystem("RetainedSpec")) with ImplicitSen
   "Requests handler actor" should {
 
     val bus = system.actorOf(Props[EventBusActor], "bus")
-    val devices = system.actorOf(Props(new SessionsManagerActor(bus)), "devices")
+    val devices = system.actorOf(Props(new SessionsManagerActor(bus, bus)), "devices")
 
     implicit val materializer = ActorMaterializer()(system)
 
