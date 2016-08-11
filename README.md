@@ -1,6 +1,6 @@
 # JetMQ
 
-[![Build Status](https://travis-ci.org/butaji/JetMQ.svg?branch=master)](https://travis-ci.org/butaji/JetMQ)
+[![Build Status](https://travis-ci.org/vpugar/JetMQ.svg?branch=master)](https://travis-ci.org/vpugar/JetMQ)
 
 ## Introduction
 JetMQ - lightweight MQTT message broker. First release will contain support for MQTT v3.1.1 (more details about protocol by the lik http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html).
