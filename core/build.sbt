@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-http-experimental_2.11" % akkaStreamVersion
 )
 
-//-javaagent:/home/vpugar/.ivy2/cache/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.6.jar
+//-javaagent:~/.ivy2/cache/org.aspectj/aspectjweaver/jars/aspectjweaver-1.8.6.jar
 javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.6" % "compile;test"
 
 parallelExecution in Test := false
